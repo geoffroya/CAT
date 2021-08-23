@@ -1,0 +1,114 @@
+---
+openapi: 3.0.1
+info:
+  title: CAT API
+  description: 'TODO'
+  termsOfService: https://cat.eduroam.org/
+  contact:
+    email: cat-users@lists.geant.org
+  license:
+    name: GEANT Standard Open Source Software Outward Licence
+    url: https://cat.eduroam.org/copyright.php
+  version: 2.0.4
+externalDocs:
+  description: Find out more about eduroam CAT
+  url: https://cat.eduroam.org/
+servers:
+- url: https://cat.eduroam.org/admin/API.php
+tags:
+- name: admin
+  description: Admin operations
+paths:
+  /:
+    post:
+      tags:
+      - admin
+      summary: main entry point
+      operationId: adminOp
+      requestBody:
+        description: Command
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Command'
+        required: true
+      responses:
+        200:
+          description: Response (Success or Error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+components:
+  schemas:
+    Parameter:
+      type: object
+      properties:
+        NAME:
+          type: string
+        VALUE:
+          type: string
+        LANG:
+          type: string
+      required:
+        - NAME
+        - VALUE
+    Command:
+      type: object
+      properties:
+        APIKEY:
+          type: string
+          description: registration API key
+        ACTION:
+          type: string
+          description: Action requested
+          enum:
+          - NEWINST-BY-REF
+          - NEWINST
+          - DELINST
+          - ADMIN-LIST
+          - ADMIN-ADD
+          - ADMIN-DEL
+          - STATISTICS-INST
+          - STATISTICS-FED
+          - DATADUMP-FED
+          - NEWPROF-RADIUS
+          - NEWPROF-MANAGED
+          - ENDUSER-NEW
+          - ENDUSER-CHANGEEXPIRY
+          - ENDUSER-DEACTIVATE
+          - ENDUSER-LIST
+          - ENDUSER-IDENTIFY
+          - TOKEN-NEW
+          - TOKEN-REVOKE
+          - TOKEN-LIST
+          - CERT-LIST
+          - CERT-REVOKE
+          - CERT-ANNOTATE
+        PARAMETERS:
+          type: array
+          items:
+            $ref: '#/components/schemas/Parameter'
+      required:
+        - APIKEY
+        - ACTION
+
+    Result:
+      type: object
+      # Result seems wuite unspecified and can vary a lot.
+      additionalProperties:
+        type: string
+
+    ApiResponse:
+      type: object
+      properties:
+        result:
+          type: string
+          enum:
+            - SUCCESS
+            - ERROR
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/Result'

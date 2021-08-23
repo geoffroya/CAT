@@ -1,0 +1,170 @@
+---
+openapi: 3.0.1
+info:
+  title: CAT API sample with full modelisation
+  description: 'TODO'
+  termsOfService: https://cat.eduroam.org/
+  contact:
+    email: cat-users@lists.geant.org
+  license:
+    name: GEANT Standard Open Source Software Outward Licence
+    url: https://cat.eduroam.org/copyright.php
+  version: X.Y.Z
+externalDocs:
+  description: Find out more about eduroam CAT
+  url: https://cat.eduroam.org/
+servers:
+- url: https://cat.eduroam.org/admin/API.php
+tags:
+- name: admin
+  description: Admin operations
+paths:
+# As instanceId is always required, we require it to be int the path (https://cat.eduroam.org/api/admin/{instanceId})
+  /admin/{instanceId}:
+    get:
+      tags:
+      - admin
+      summary: get admin list
+      operationId: adminList
+      parameters:
+      - name: instanceId
+        in: path
+        required: True
+        description: eduroam instance id
+        schema:
+          type: string
+      security:
+      - api_key: []
+      responses:
+        200:
+          description: instance found, and result ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Administrator'
+        401:
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: "Forbidden: credentials not allowed to fetch this instance"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+      - admin
+      summary: add administator
+      operationId: adminAdd
+      parameters:
+      - name: instanceId
+        in: path
+        required: True
+        description: eduroam instance id
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Administrator'
+        required: true
+      security:
+      - api_key: []
+      responses:
+        201:
+          description: Response (Success or Error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminAddResponse'
+        401:
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: "Forbidden: credentials not allowed to fetch this instance"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+     tags:
+     - admin
+     summary: delete administrator
+     operationId: adminDelete
+     parameters:
+     - name: instanceId
+       in: path
+       required: True
+       description: eduroam instance id
+       schema:
+         type: string
+     - name: adminId
+       in: query
+       required: True
+       description: admin persistent Id
+       schema:
+         type: string
+     security:
+     - api_key: []
+     responses:
+       200:
+         description: Response (Success or Error)
+       401:
+         description: Not authorized
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/Error'
+       403:
+         description: "Forbidden: credentials not allowed to fetch this instance"
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/Error'
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+  schemas:
+    Error:
+      type: object
+      properties:
+        errorcode:
+          type: integer
+        description:
+          type: string
+    Administrator:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        mail:
+          type: string
+          format: email
+        level:
+          type: string
+          enum:
+          - FED
+          - INST
+    AdminAddResponse:
+      type: object
+      properties:
+        tokenUrl:
+          type: string
+        emailSent:
+          type: boolean
+        emailTransportSecure:
+          type: boolean
